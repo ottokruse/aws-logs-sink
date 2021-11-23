@@ -1,7 +1,11 @@
 {
   "name": "aws-logs-sink",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Stream logs to Amazon CloudWatch logs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ottokruse/aws-logs-sink"
+  },
   "main": "index.js",
   "files": [
     "index.js",
@@ -15,7 +19,10 @@
     "CloudWatch",
     "Logs"
   ],
-  "author": "Otto Kruse",
+  "author": {
+    "name": "Otto Kruse",
+    "url": "https://github.com/ottokruse"
+  },
   "license": "MIT",
   "devDependencies": {
     "@tsconfig/node14": "^1.0.1",
