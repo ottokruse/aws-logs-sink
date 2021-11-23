@@ -1,6 +1,6 @@
 {
   "name": "aws-logs-sink",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Stream logs to Amazon CloudWatch logs",
   "repository": {
     "type": "git",

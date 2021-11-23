@@ -1,6 +1,10 @@
 # aws-logs-sink
 
-Stream logs to AWS CloudWatch logs.
+Stream logs to AWS CloudWatch Logs.
+
+## Can't I just use the AWS CLI/SDK?
+
+Yes, but streaming logs to CloudWatch Logs is slightly less trivial than you might think, because each successive `putLogEvents` call must include the log stream's `nextSequenceToken` from the previous `putLogEvents` call. This module is a small wrapper around the JavaScript AWS SDK (V3) to make it easy for you.
 
 ## CLI usage
 
@@ -26,13 +30,13 @@ The log group and stream will be created if they don't exist. If the log stream 
 
 CLI options:
 
-| Option               | Description                                                                   |
-| -------------------- | ----------------------------------------------------------------------------- |
-| -f, --flush-interval | Flush to CloudWatch every X seconds (default: 1)                              |
-| --tee                | Also print all input to stdout                                                |
-| --eol                | Line termination character(s) (default: "\n" on Mac/Linux, "\r\n" on Windows) |
-| --profile            | AWS profile to use. Setting environment variable AWS_PROFILE works too        |
-| --region             | AWS region to use. Setting environment variable AWS_REGION works too          |
+| Option                   | Description                                                                   |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| `-f`, `--flush-interval` | Flush to CloudWatch every `X` seconds (default: 1)                            |
+| `--tee`                  | Also print all input to `stdout`                                              |
+| `--eol`                  | Line termination character(s) (default: `\n` on Mac/Linux, `\r\n` on Windows) |
+| `--profile`              | AWS profile to use. Setting environment variable `AWS_PROFILE` works too      |
+| `--region`               | AWS region to use. Setting environment variable `AWS_REGION` works too        |
 
 ## Programmatic usage
 
