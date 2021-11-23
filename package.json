@@ -1,0 +1,38 @@
+{
+  "name": "aws-logs-sink",
+  "version": "1.0.0",
+  "description": "Stream logs to Amazon CloudWatch logs",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "AWS",
+    "CloudWatch",
+    "Logs"
+  ],
+  "author": "Otto Kruse",
+  "license": "MIT-0",
+  "devDependencies": {
+    "@tsconfig/node14": "^1.0.1",
+    "@types/node": "^16.11.9",
+    "@types/yargs": "^17.0.7",
+    "@typescript-eslint/eslint-plugin": "^5.4.0",
+    "@typescript-eslint/parser": "^5.4.0",
+    "eslint": "^8.3.0",
+    "prettier": "^2.4.1",
+    "typescript": "^4.5.2"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cloudwatch-logs": "^3.42.0",
+    "yargs": "^17.2.1"
+  },
+  "prettier": {
+    "trailingComma": "es5"
+  },
+  "bin": "./index.js"
+}
