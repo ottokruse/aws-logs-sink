@@ -16,7 +16,7 @@
     "Logs"
   ],
   "author": "Otto Kruse",
-  "license": "MIT-0",
+  "license": "MIT",
   "devDependencies": {
     "@tsconfig/node14": "^1.0.1",
     "@types/node": "^16.11.9",
