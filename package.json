@@ -1,6 +1,6 @@
 {
   "name": "aws-logs-sink",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Stream logs to Amazon CloudWatch logs",
   "repository": {
     "type": "git",
@@ -12,7 +12,9 @@
     "index.d.ts"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "prepare": "tsc"
   },
   "keywords": [
     "AWS",

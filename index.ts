@@ -132,7 +132,7 @@ export default function sink(config: {
   const pipelineHead = cloudWatchInit({ ...config, client });
   stream.pipeline(
     pipelineHead,
-    splitLines(config.eol),
+    assembleLines(config.eol),
     cloudWatchLogsSink({ ...config, client }),
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     () => {}
@@ -175,11 +175,11 @@ function cloudWatchLogsSink(config: {
 
   return new stream.Writable({
     construct: function (cb) {
-      flushTimer = setInterval(
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        flushBufferToCloudWatchLogs,
-        config.flushInterval ?? 1000
-      );
+      flushTimer = setInterval(() => {
+        flushBufferToCloudWatchLogs().catch((err) =>
+          this.destroy(err as Error)
+        );
+      }, config.flushInterval ?? 1000);
       cb();
     },
     destroy: function (err, cb) {
@@ -207,7 +207,7 @@ function cloudWatchLogsSink(config: {
   });
 }
 
-async function doSendLogstoCloudWatch(config: {
+async function doSendLogstoCloudWatch(props: {
   client: CloudWatchLogsClient;
   logGroupName: string;
   logStreamName: string;
@@ -215,7 +215,7 @@ async function doSendLogstoCloudWatch(config: {
   sequenceToken?: string;
 }) {
   const { client, logGroupName, logStreamName, sequenceToken, logEvents } =
-    config;
+    props;
   const { nextSequenceToken } = await client.send(
     new PutLogEventsCommand({
       logEvents,
@@ -227,7 +227,7 @@ async function doSendLogstoCloudWatch(config: {
   return nextSequenceToken;
 }
 
-async function sendLogsToCloudWatch(config: {
+async function sendLogsToCloudWatch(props: {
   client: CloudWatchLogsClient;
   logGroupName: string;
   logStreamName: string;
@@ -235,7 +235,7 @@ async function sendLogsToCloudWatch(config: {
   sequenceToken?: string;
 }) {
   try {
-    return await doSendLogstoCloudWatch(config);
+    return await doSendLogstoCloudWatch(props);
   } catch (err) {
     if (
       [
@@ -243,40 +243,41 @@ async function sendLogsToCloudWatch(config: {
         "InvalidSequenceTokenException",
       ].includes((err as { name?: string }).name ?? "__no_name_in_error__")
     ) {
-      logger.debug("Syncing sequenceToken, was:", config.sequenceToken);
-      const sequenceToken = await getLogStreamSequenceToken(config);
+      logger.debug("Syncing sequenceToken, was:", props.sequenceToken);
+      const sequenceToken = await getLogStreamSequenceToken(props);
       logger.debug("New sequenceToken is:", sequenceToken);
-      return await doSendLogstoCloudWatch({ ...config, sequenceToken });
+      return await doSendLogstoCloudWatch({ ...props, sequenceToken });
     } else {
       throw err;
     }
   }
 }
 
-function splitLines(eol = os.EOL) {
-  let previousLine: string | undefined = undefined;
+function assembleLines(eol = os.EOL) {
+  const eolAsBuffer = Buffer.from(eol);
+  const empty = Buffer.alloc(0);
+  let buffered = empty;
   return new stream.Transform({
     transform: function (chunk: Buffer, _encoding, cb) {
-      const text = chunk.toString();
-      const endsWithNewLine = text && text[text.length - 1] === eol;
-      const [first, ...lines] = text.split(eol);
-      this.push(previousLine ? previousLine + first : first);
-      const middle = lines.splice(0, lines.length - 1);
-      const [last] = lines;
-      for (const line of middle) {
-        this.push(line);
-      }
-      if (endsWithNewLine) {
-        this.push(last);
-        previousLine = undefined;
+      const concatenated = Buffer.concat([buffered, chunk]);
+      if (
+        Buffer.compare(
+          eolAsBuffer,
+          concatenated.slice(concatenated.length - eolAsBuffer.length)
+        ) === 0 // check if chunk ends with EOL
+      ) {
+        // chunk ends with EOL, i.e. a complete message
+        this.push(concatenated);
+        buffered = empty;
       } else {
-        previousLine = last;
+        // chunk does not end with EOL, i.e. not a complete message, wait for additional chunk
+        buffered = concatenated;
       }
       cb();
     },
     final: function (cb) {
-      if (previousLine !== undefined) {
-        this.push(previousLine);
+      if (buffered.length) {
+        this.push(buffered);
       }
       cb();
     },

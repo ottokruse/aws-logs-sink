@@ -2,9 +2,11 @@
 
 Stream logs to AWS CloudWatch Logs.
 
+Either pipe your log lines to `stdin` from the CLI, or use this module programmatically in NodeJS––it exposes a NodeJS [writable stream](https://nodejs.org/api/stream.html#writable-streams).
+
 ## Can't I just use the AWS CLI/SDK?
 
-Yes, but streaming logs to CloudWatch Logs is slightly less trivial than you might think, because each successive `putLogEvents` call must include the log stream's `nextSequenceToken` from the previous `putLogEvents` call. This module is a small wrapper around the JavaScript AWS SDK (V3) to make it easy for you.
+Yes, but streaming logs to CloudWatch Logs is slightly less trivial than you might think, because each successive `putLogEvents` call must include the log stream's `nextSequenceToken` from the previous `putLogEvents` call. This module is a small wrapper around the JavaScript AWS SDK (V3) to make streaming logs easy.
 
 ## CLI usage
 
@@ -14,7 +16,7 @@ Install globally:
 npm install -g aws-logs-sink
 ```
 
-Provide the log group name and stream name as arguments, and write to `stdin`:
+Provide the log group name and stream name as arguments, and pipe to `stdin`:
 
 ```shell
 echo "This is a test" | aws-logs-sink <log-group-name> <log-stream-name>
@@ -49,6 +51,7 @@ npm install aws-logs-sink
 ```javascript
 import awsLogsSink from "aws-logs-sink";
 
+// awsLogsSink is a function that returns a NodeJS writable stream:
 const writable = awsLogsSink({
   logGroupName: "<log-group-name>",
   logStreamName: "<log-stream-name>",
